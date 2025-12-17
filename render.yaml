@@ -1,0 +1,49 @@
+services:
+  # Main Application
+  - type: web
+    name: kontrol-app
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm ci && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm run start:prod
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kontrol-db
+          property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          name: kontrol-redis
+          type: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: kontrol-redis
+          type: redis
+          property: port
+      - key: PORT
+        value: 10000
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_TASKS_CHAT_ID
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+
+  # Redis
+  - type: redis
+    name: kontrol-redis
+    region: frankfurt
+    plan: free
+    maxmemoryPolicy: noeviction
+
+databases:
+  # PostgreSQL
+  - name: kontrol-db
+    region: frankfurt
+    plan: free
+    databaseName: kontrol
+    user: kontrol
