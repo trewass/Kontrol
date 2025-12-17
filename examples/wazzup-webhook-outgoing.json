@@ -1,0 +1,12 @@
+{
+  "event": "message",
+  "data": {
+    "messageId": "wamid.OUTGOING123456",
+    "chatId": "79161234567@c.us",
+    "chatType": "whatsapp",
+    "senderId": "me",
+    "text": "Хорошо, сделаем сегодня",
+    "timestamp": 1704110500000,
+    "direction": "outgoing"
+  }
+}

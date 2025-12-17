@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kontrol - Задачи</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { margin-bottom: 20px; color: #333; }
+    .filters { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .filters select, .filters input { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+    .filters input[type="text"] { flex: 1; min-width: 200px; }
+    .filters button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .filters button:hover { background: #0056b3; }
+    .tasks { display: grid; gap: 15px; }
+    .task { background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #ddd; transition: transform 0.2s; }
+    .task:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .task.NEW { border-left-color: #28a745; }
+    .task.IN_PROGRESS { border-left-color: #007bff; }
+    .task.CLARIFICATION { border-left-color: #ffc107; }
+    .task.POSTPONED { border-left-color: #ff9800; }
+    .task.DONE { border-left-color: #6c757d; }
+    .task.REJECTED { border-left-color: #dc3545; }
+    .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .task-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px; }
+    .task-status { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .status-NEW { background: #d4edda; color: #155724; }
+    .status-IN_PROGRESS { background: #cce5ff; color: #004085; }
+    .status-CLARIFICATION { background: #fff3cd; color: #856404; }
+    .status-POSTPONED { background: #ffe5cc; color: #8B4513; }
+    .status-DONE { background: #e2e3e5; color: #383d41; }
+    .status-REJECTED { background: #f8d7da; color: #721c24; }
+    .task-meta { color: #666; font-size: 14px; margin-top: 8px; }
+    .task-meta span { margin-right: 15px; }
+    .task-description { color: #555; margin-top: 10px; line-height: 1.5; }
+    .task-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .tag { background: #e9ecef; padding: 3px 8px; border-radius: 4px; font-size: 12px; color: #495057; }
+    .empty { text-align: center; padding: 60px 20px; color: #999; }
+    .task-link { text-decoration: none; color: inherit; display: block; }
+    .priority-high { border-left-width: 6px !important; border-left-color: #dc3545 !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📋 Kontrol — Задачи</h1>
+
+    <div style="margin-bottom: 15px;">
+      <a href="/admin/sources" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; display: inline-block;">⚙️ Управление источниками</a>
+    </div>
+
+    <form class="filters" method="GET" action="/admin">
+      <select name="status">
+        {{#each statuses}}
+        <option value="{{this}}" {{#if (eq this ../statusFilter)}}selected{{/if}}>
+          {{#if (eq this "ALL")}}Все статусы{{/if}}
+          {{#if (eq this "NEW")}}🆕 Новые{{/if}}
+          {{#if (eq this "IN_PROGRESS")}}🔵 В работе{{/if}}
+          {{#if (eq this "CLARIFICATION")}}🟡 Уточняется{{/if}}
+          {{#if (eq this "POSTPONED")}}🟠 Перенесено{{/if}}
+          {{#if (eq this "DONE")}}✅ Выполнено{{/if}}
+          {{#if (eq this "REJECTED")}}🧨 Отклонено{{/if}}
+        </option>
+        {{/each}}
+      </select>
+
+      <input type="text" name="search" placeholder="Поиск по клиенту, объекту, описанию..." value="{{searchQuery}}">
+      <button type="submit">Найти</button>
+    </form>
+
+    <div class="tasks">
+      {{#if tasks.length}}
+        {{#each tasks}}
+        <a href="/admin/task/{{this.id}}" class="task-link">
+          <div class="task {{this.status}} {{#if (eq this.priority 'HIGH')}}priority-high{{/if}}">
+            <div class="task-header">
+              <div>
+                <div class="task-title">{{this.title}}</div>
+                {{#if this.description}}
+                <div class="task-description">{{this.description}}</div>
+                {{/if}}
+              </div>
+              <span class="task-status status-{{this.status}}">
+                {{#if (eq this.status "NEW")}}🆕 Новая{{/if}}
+                {{#if (eq this.status "IN_PROGRESS")}}🔵 В работе{{/if}}
+                {{#if (eq this.status "CLARIFICATION")}}🟡 Уточняется{{/if}}
+                {{#if (eq this.status "POSTPONED")}}🟠 Перенесено{{/if}}
+                {{#if (eq this.status "DONE")}}✅ Выполнено{{/if}}
+                {{#if (eq this.status "REJECTED")}}🧨 Отклонено{{/if}}
+              </span>
+            </div>
+
+            <div class="task-meta">
+              {{#if this.clientName}}<span>👤 {{this.clientName}}</span>{{/if}}
+              {{#if this.objectName}}<span>📍 {{this.objectName}}</span>{{/if}}
+              {{#if this.assignee}}<span>👷 {{this.assignee.name}}</span>{{/if}}
+              {{#if this.dueText}}<span>⏰ {{this.dueText}}</span>{{/if}}
+              <span>🕒 {{formatDate this.createdAt}}</span>
+            </div>
+
+            {{#if this.tags.length}}
+            <div class="task-tags">
+              {{#each this.tags}}
+              <span class="tag">{{this}}</span>
+              {{/each}}
+            </div>
+            {{/if}}
+          </div>
+        </a>
+        {{/each}}
+      {{else}}
+        <div class="empty">
+          <h2>Задачи не найдены</h2>
+          <p>Попробуйте изменить фильтры</p>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+</body>
+</html>

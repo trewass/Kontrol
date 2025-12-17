@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SourceType {
+  TELEGRAM
+  WAZZUP
+}
+
+enum TaskStatus {
+  NEW
+  IN_PROGRESS
+  CLARIFICATION
+  POSTPONED
+  DONE
+  REJECTED
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+enum EventType {
+  CREATED
+  STATUS_CHANGED
+  ASSIGNED
+  REMINDED
+}
+
+model Source {
+  id        String     @id @default(cuid())
+  type      SourceType
+  externalId String    @map("external_id") // chat_id для Telegram, channel_id для Wazzup
+  name      String?
+  createdAt DateTime   @default(now()) @map("created_at")
+  tasks     Task[]
+
+  @@unique([type, externalId])
+  @@map("sources")
+}
+
+model User {
+  id            String      @id @default(cuid())
+  telegramUsername String?  @unique @map("telegram_username")
+  telegramId    String?     @unique @map("telegram_id")
+  name          String?
+  createdAt     DateTime    @default(now()) @map("created_at")
+  assignedTasks Task[]
+  events        TaskEvent[]
+
+  @@map("users")
+}
+
+model Task {
+  id              String       @id @default(cuid())
+  status          TaskStatus   @default(NEW)
+  priority        TaskPriority @default(NORMAL)
+
+  title           String
+  description     String?
+  clientName      String?      @map("client_name")
+  objectName      String?      @map("object_name")
+  tags            String[]     @default([])
+
+  dueText         String?      @map("due_text")
+  dueAt           DateTime?    @map("due_at")
+
+  assigneeId      String?      @map("assignee_id")
+  assignee        User?        @relation(fields: [assigneeId], references: [id])
+
+  sourceId        String       @map("source_id")
+  source          Source       @relation(fields: [sourceId], references: [id])
+
+  sourceMessageId String       @map("source_message_id") // message_id из Telegram или event_id из Wazzup
+
+  tasksMessageId  String?      @map("tasks_message_id") // message_id в главном чате задач
+  tasksChatId     String?      @map("tasks_chat_id")
+
+  confidence      Float        @default(0.0)
+
+  lastRemindedAt  DateTime?    @map("last_reminded_at")
+  remindedCount   Int          @default(0) @map("reminded_count")
+
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  events          TaskEvent[]
+
+  @@unique([sourceId, sourceMessageId])
+  @@index([status])
+  @@index([assigneeId])
+  @@index([dueAt])
+  @@map("tasks")
+}
+
+model TaskEvent {
+  id          String    @id @default(cuid())
+  taskId      String    @map("task_id")
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  type        EventType
+  oldStatus   TaskStatus? @map("old_status")
+  newStatus   TaskStatus? @map("new_status")
+
+  userId      String?   @map("user_id")
+  user        User?     @relation(fields: [userId], references: [id])
+
+  metadata    Json?
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([taskId])
+  @@index([createdAt])
+  @@map("task_events")
+}

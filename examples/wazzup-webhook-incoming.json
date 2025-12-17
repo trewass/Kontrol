@@ -1,0 +1,13 @@
+{
+  "event": "message",
+  "data": {
+    "messageId": "wamid.HBgNNDk3NDEyMzQ1Njc4OTAVAgARGBI5QTdBRjFDMkQ0RTc3NTVBOAA=",
+    "chatId": "79161234567@c.us",
+    "chatType": "whatsapp",
+    "senderId": "79161234567",
+    "senderName": "Иванов Петр",
+    "text": "Надо срочно поменять типон на двери в офисе на Ленина 5, сенсор глючит",
+    "timestamp": 1704110400000,
+    "direction": "incoming"
+  }
+}

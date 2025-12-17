@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Источники - Kontrol Admin</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header h1 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .nav {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .nav a {
+      padding: 8px 16px;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .nav a:hover {
+      background: #0056b3;
+    }
+    .add-form {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .add-form h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #555;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+    .submit-btn {
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .submit-btn:hover {
+      background: #218838;
+    }
+    .sources-list {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .sources-list h2 {
+      padding: 20px;
+      font-size: 18px;
+      color: #333;
+      border-bottom: 1px solid #eee;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px 20px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #555;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+    td {
+      color: #333;
+      font-size: 14px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .badge-telegram {
+      background: #0088cc;
+      color: white;
+    }
+    .badge-wazzup {
+      background: #25D366;
+      color: white;
+    }
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Управление источниками</h1>
+      <div class="nav">
+        <a href="/admin">← Назад к задачам</a>
+      </div>
+    </div>
+
+    <div class="add-form">
+      <h2>Добавить новый источник</h2>
+      <form method="POST" action="/admin/sources">
+        <div class="form-group">
+          <label for="type">Тип источника:</label>
+          <select name="type" id="type" required>
+            <option value="TELEGRAM">Telegram</option>
+            <option value="WAZZUP">Wazzup (amoCRM)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="externalId">ID чата/канала:</label>
+          <input
+            type="text"
+            name="externalId"
+            id="externalId"
+            placeholder="Например: -1001234567890"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="name">Название (опционально):</label>
+          <input
+            type="text"
+            name="name"
+            id="name"
+            placeholder="Например: Производственный чат"
+          />
+        </div>
+
+        <button type="submit" class="submit-btn">Добавить источник</button>
+      </form>
+    </div>
+
+    <div class="sources-list">
+      <h2>Зарегистрированные источники</h2>
+      {{#if sources.length}}
+        <table>
+          <thead>
+            <tr>
+              <th>Тип</th>
+              <th>ID</th>
+              <th>Название</th>
+              <th>Дата создания</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each sources}}
+              <tr>
+                <td>
+                  {{#if (eq type "TELEGRAM")}}
+                    <span class="badge badge-telegram">Telegram</span>
+                  {{else}}
+                    <span class="badge badge-wazzup">Wazzup</span>
+                  {{/if}}
+                </td>
+                <td><code>{{externalId}}</code></td>
+                <td>{{#if name}}{{name}}{{else}}<em>Без названия</em>{{/if}}</td>
+                <td>{{createdAt}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      {{else}}
+        <div class="empty-state">
+          <p>Нет зарегистрированных источников</p>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+</body>
+</html>

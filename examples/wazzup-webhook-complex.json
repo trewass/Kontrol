@@ -1,0 +1,13 @@
+{
+  "event": "message",
+  "data": {
+    "messageId": "wamid.HBgNNDk3NDEyMzQ1Njc4OTAVAgARGBI5QTdBRjFDMkQ0RTc3NTVCOAA=",
+    "chatId": "79267654321@c.us",
+    "chatType": "whatsapp",
+    "senderId": "79267654321",
+    "senderName": "Сидорова Мария",
+    "text": "Распилить ДСП 2800x600 белый, нужно к пятнице. Клиент Петров, объект Садовая 12",
+    "timestamp": 1704120000000,
+    "direction": "incoming"
+  }
+}
