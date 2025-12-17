@@ -7,6 +7,7 @@ services:
     plan: free
     buildCommand: npm ci && npx prisma generate && npm run build
     startCommand: npx prisma migrate deploy && npm run start:prod
+    ipAllowList: []
     envVars:
       - key: NODE_VERSION
         value: 20.11.0
@@ -39,6 +40,7 @@ services:
     region: frankfurt
     plan: free
     maxmemoryPolicy: noeviction
+    ipAllowList: []
 
 databases:
   # PostgreSQL
@@ -47,3 +49,4 @@ databases:
     plan: free
     databaseName: kontrol
     user: kontrol
+    ipAllowList: []
